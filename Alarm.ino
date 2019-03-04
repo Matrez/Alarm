@@ -1,12 +1,12 @@
 /*
- * 2,3 cervena LED
- * 4,5 zlta LED
- * 6,7 zelena LED
- * 8,9 tlacidla
- * 10,11 senzory otvarania
- * 12 senzor otrasu
- * 13 bzuciak
- *
+   2,3 cervena LED
+   4,5 zlta LED
+   6,7 zelena LED
+   8,9 tlacidla
+   10,11 senzory otvarania
+   12 senzor otrasu
+   13 bzuciak
+
 */
 
 const unsigned long timeToDeactivation = 10000; // V milisekundach
@@ -14,7 +14,7 @@ unsigned long time;
 
 const short leftBtn = 8;
 const short rightBtn = 9;
-const short score = 0;
+short score = 0;
 const short bzuciak = 13;
 
 boolean doNotBzuciak = false;
@@ -51,16 +51,17 @@ void loop() {
             break;
           }
       }
-      if (score === 3) {
+      if (score == 3) {
         for (int i = 0; i < 5; i++) {
           digitalWrite(bzuciak, HIGH);
           delay(500);
           digitalWrite(bzuciak, LOW);
+          delay(500);
         }
         doNotBzuciak = true;
       }
     }
-    if (doNotBzuciak) {
+    if (!doNotBzuciak) {
       digitalWrite(bzuciak, HIGH);
       delay(5000);
       digitalWrite(bzuciak, LOW);
