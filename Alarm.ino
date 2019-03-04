@@ -20,13 +20,14 @@ void setup() {
 }
 
 void loop() {
+  // Kontroluje rozopnute magnety
   if ((digitalRead(10) == LOW) || (digitalRead(11) == LOW)) {
     digitalWrite(13, HIGH);
     delay(1000);
     digitalWrite(13, LOW);
   };
 
-
+  // Kontroluje otrasy
   if (digitalRead(12) == LOW) {
     for (int i = 0; i < 3; ++i) {
       digitalWrite(13, HIGH);
@@ -39,5 +40,4 @@ void loop() {
       delay(500);
     }
   };
-
 }
