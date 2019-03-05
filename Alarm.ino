@@ -6,16 +6,28 @@
    10,11 senzory otvarania
    12 senzor otrasu
    13 bzuciak
+   A0 - snimac pohybu
+   A1 - start/koniec tlacidlo
 
 */
 
 const unsigned long timeToDeactivation = 10000; // V milisekundach
-unsigned long time;
+unsigned long tajm;
 
-const short leftBtn = 8;
-const short rightBtn = 9;
+
 short score = 0;
-const short bzuciak = 13;
+const byte redLed1 = 2;
+const byte redLed2 = 3;
+const byte yellowLed1 = 4;
+const byte yellowLed2 = 5;
+const byte greenLed1 = 6;
+const byte greenLed2 = 7;
+const byte leftBtn = 8;
+const byte rightBtn = 9;
+const byte leftSens = 10;
+const byte rightSens = 11;
+const byte tiltSens = 12;
+const byte bzuciak = 13;
 
 boolean doNotBzuciak = false;
 
@@ -26,14 +38,15 @@ void setup() {
   for (int i = 8; i <= 12; ++i) {
     pinMode(i, INPUT);
   }
-  pinMode(13, OUTPUT);
+  pinMode(bzuciak, OUTPUT);
 }
 
 void loop() {
+  
   // Kontroluje rozopnute magnety
-  if ((digitalRead(10) == LOW) || (digitalRead(11) == LOW)) {
-    time = millis();
-    while ((millis() - time) < timeToDeactivation) {
+  if ((digitalRead(leftSens) == LOW) || (digitalRead(rightSens) == LOW)) {
+    tajm = millis();
+    while ((millis() - tajm) < timeToDeactivation) {
       switch (score) {
         case 0:
           if (scan_button(leftBtn)) {
@@ -52,19 +65,28 @@ void loop() {
           }
       }
       if (score == 3) {
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 3; i++) {
           digitalWrite(bzuciak, HIGH);
-          delay(500);
+          digitalWrite(greenLed1, HIGH);
+          digitalWrite(greenLed2, HIGH);
+          delay(200);
           digitalWrite(bzuciak, LOW);
-          delay(500);
+          digitalWrite(greenLed1, LOW);
+          digitalWrite(greenLed2, LOW);
+          delay(200);
         }
         doNotBzuciak = true;
+        break;
       }
     }
     if (!doNotBzuciak) {
       digitalWrite(bzuciak, HIGH);
+      digitalWrite(redLed1, HIGH);
+      digitalWrite(redLed2, HIGH);
       delay(5000);
       digitalWrite(bzuciak, LOW);
+      digitalWrite(redLed1, LOW);
+      digitalWrite(redLed2, LOW);
     }
     // Reset values
     doNotBzuciak = false;
@@ -72,24 +94,39 @@ void loop() {
   };
 
   // Kontroluje otrasy
-  if (digitalRead(12) == LOW) {
+  if (digitalRead(tiltSens) == LOW) {
     for (int i = 0; i < 3; ++i) {
-      digitalWrite(13, HIGH);
-      digitalWrite(4, HIGH);
-      digitalWrite(5, HIGH);
-      delay(1000);
-      digitalWrite(13, LOW);
-      digitalWrite(4, LOW);
-      digitalWrite(5, LOW);
+      digitalWrite(bzuciak, HIGH);
+      digitalWrite(yellowLed1, HIGH);
+      digitalWrite(yellowLed2, HIGH);
       delay(500);
+      digitalWrite(bzuciak, LOW);
+      digitalWrite(yellowLed1, LOW);
+      digitalWrite(yellowLed2, LOW);
+      delay(200);
     }
   };
-}
+
+/* // Kontroluje pohyb
+  do {
+    digitalWrite(2, HIGH);
+    digitalWrite(3, HIGH);
+    delay(500);
+    digitalWrite(2, LOW);
+    digitalWrite(3, LOW);
+    delay(500);
+  } while (digitalRead(A0)== LOW);
+  */
+} 
 
 int scan_button(int pin) {
   if (digitalRead(pin)) {
+    digitalWrite(yellowLed1, HIGH);
+    digitalWrite(yellowLed2, HIGH);
     delay(20);
     while (digitalRead(pin)) {}
+    digitalWrite(yellowLed1, LOW);
+    digitalWrite(yellowLed2, LOW);
     delay(20);
     return 1;
   }
