@@ -29,7 +29,8 @@ const byte rightSens = 11;
 const byte tiltSens = 12;
 const byte bzuciak = 13;
 
-boolean doNotBzuciak = false;
+bool outOfTime = true;
+bool wrongPin = false;
 
 void setup() {
   for (int i = 2; i <= 7; ++i) {
@@ -42,7 +43,7 @@ void setup() {
 }
 
 void loop() {
-  
+
   // Kontroluje rozopnute magnety
   if ((digitalRead(leftSens) == LOW) || (digitalRead(rightSens) == LOW)) {
     tajm = millis();
@@ -52,9 +53,17 @@ void loop() {
           if (scan_button(leftBtn)) {
             score++;
             break;
+          } else if (scan_button(rightBtn)) {
+            wrongPin = true;
+            score++;
+            break;
           }
         case 1:
           if (scan_button(rightBtn)) {
+            score++;
+            break;
+          } else if (scan_button(leftBtn)) {
+            wrongPin = true;
             score++;
             break;
           }
@@ -62,9 +71,15 @@ void loop() {
           if (scan_button(leftBtn)) {
             score++;
             break;
+          } else if (scan_button(rightBtn)) {
+            wrongPin = true;
+            score++;
+            break;
           }
       }
-      if (score == 3) {
+      // Ak sa stlacili 3x tlacidla a pin bol DOBRY
+      if (score == 3 && !wrongPin) {
+        // Volny pristup v aute
         for (int i = 0; i < 3; i++) {
           digitalWrite(bzuciak, HIGH);
           digitalWrite(greenLed1, HIGH);
@@ -75,21 +90,20 @@ void loop() {
           digitalWrite(greenLed2, LOW);
           delay(200);
         }
-        doNotBzuciak = true;
+        outOfTime = false;
         break;
       }
+      // Ak sa stlacili 3x tlacidla a pin bol ZLY
+      if (score == 3 && wrongPin) {
+        wrongPinSound(true);
+        wrongPin = false;
+        outOfTime = false;
+      }
     }
-    if (!doNotBzuciak) {
-      digitalWrite(bzuciak, HIGH);
-      digitalWrite(redLed1, HIGH);
-      digitalWrite(redLed2, HIGH);
-      delay(5000);
-      digitalWrite(bzuciak, LOW);
-      digitalWrite(redLed1, LOW);
-      digitalWrite(redLed2, LOW);
-    }
+    wrongPinSound(outOfTime);
     // Reset values
-    doNotBzuciak = false;
+    wrongPin = false;
+    outOfTime = true;
     score = 0;
   };
 
@@ -117,7 +131,22 @@ void loop() {
     delay(500);
   } while (digitalRead(A0)== LOW);
   */
-} 
+}
+
+int wrongPinSound(bool condition) {
+  // Ak sa zadal nespravny PIN, zabzuci
+  if (condition) {
+    digitalWrite(bzuciak, HIGH);
+    digitalWrite(redLed1, HIGH);
+    digitalWrite(redLed2, HIGH);
+    delay(5000);
+    digitalWrite(bzuciak, LOW);
+    digitalWrite(redLed1, LOW);
+    digitalWrite(redLed2, LOW);
+    return 1
+  }
+  return 0;
+}
 
 int scan_button(int pin) {
   if (digitalRead(pin)) {
