@@ -52,33 +52,33 @@ void loop() {
       delay (150);
       switch (score) {
         case 0:
-          if (scan_button(leftBtn)) {
+          if (scan_button_with_yellow_led(leftBtn)) {
             Serial.println("Case 0: Stlacene spravne");
             score++;
             break;
-          } else if (scan_button(rightBtn)) {
+          } else if (scan_button_with_yellow_led(rightBtn)) {
             Serial.println("Case 0: Stlacene zle");
             wrongPin = true;
             score++;
             break;
           }
         case 1:
-          if (scan_button(rightBtn)) {
+          if (scan_button_with_yellow_led(rightBtn)) {
             Serial.println("Case 1: Stlacene spravne");
             score++;
             break;
-          } else if (scan_button(leftBtn)) {
+          } else if (scan_button_with_yellow_led(leftBtn)) {
             Serial.println("Case 1: Stlacene zle");
             wrongPin = true;
             score++;
             break;
           }
         case 2:
-          if (scan_button(leftBtn)) {
+          if (scan_button_with_yellow_led(leftBtn)) {
             Serial.println("Case 2: Stlacene spravne");
             score++;
             break;
-          } else if (scan_button(rightBtn)) {
+          } else if (scan_button_with_yellow_led(rightBtn)) {
             Serial.println("Case 2: Stlacene zle");
             wrongPin = true;
             score++;
@@ -98,12 +98,10 @@ void loop() {
           digitalWrite(greenLed2, LOW);
           delay(200);
         }
-        digitalWrite(greenLed1, HIGH);
-        digitalWrite(greenLed2, HIGH);
         digitalWrite(yellowLed1, HIGH);
         digitalWrite(yellowLed2, HIGH);
 
-        while () {
+        while (true) {
           bool closedDoors;
           if ((digitalRead(leftSens) == HIGH) && (digitalRead(rightSens) == HIGH)) {
             closedDoors = true;
@@ -114,6 +112,8 @@ void loop() {
           if (scan_button(leftBtn) || scan_button(rightBtn)) {
             if (closedDoors) {
               Serial.println("Dvere su zavrete");
+              digitalWrite(yellowLed1, LOW);
+              digitalWrite(yellowLed2, LOW);
               digitalWrite(greenLed1, HIGH);
               digitalWrite(greenLed2, HIGH);
               delay(3000);
@@ -122,6 +122,8 @@ void loop() {
               break;
             } else {
               Serial.println("Najprv treba zavriet dvere");
+              digitalWrite(yellowLed1, LOW);
+              digitalWrite(yellowLed2, LOW);
               digitalWrite(redLed1, HIGH);
               digitalWrite(redLed2, HIGH);
               digitalWrite(bzuciak, HIGH);
@@ -129,6 +131,8 @@ void loop() {
               digitalWrite(redLed1, LOW);
               digitalWrite(redLed2, LOW);
               digitalWrite(bzuciak, LOW);
+              digitalWrite(yellowLed1, HIGH);
+              digitalWrite(yellowLed2, HIGH);
             }
           }
         }
@@ -190,6 +194,17 @@ void wrongPinSound(bool condition) {
 }
 
 int scan_button(int pin) {
+  if (digitalRead(pin)) {
+    delay(50);
+    while (digitalRead(pin)) {}
+    delay(50);
+    return 1;
+  }
+  return 0;
+}
+
+
+int scan_button_with_yellow_led(int pin) {
   if (digitalRead(pin)) {
     digitalWrite(yellowLed1, HIGH);
     digitalWrite(yellowLed2, HIGH);
