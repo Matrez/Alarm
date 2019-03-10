@@ -40,6 +40,7 @@ void setup() {
     pinMode(i, INPUT);
   }
   pinMode(bzuciak, OUTPUT);
+  Serial.begin(9600);
 }
 
 void loop() {
@@ -48,30 +49,37 @@ void loop() {
   if ((digitalRead(leftSens) == LOW) || (digitalRead(rightSens) == LOW)) {
     tajm = millis();
     while ((millis() - tajm) < timeToDeactivation) {
+      delay (150);
       switch (score) {
         case 0:
           if (scan_button(leftBtn)) {
+            Serial.println("Case 0: Stlacene spravne");
             score++;
             break;
           } else if (scan_button(rightBtn)) {
+            Serial.println("Case 0: Stlacene zle");
             wrongPin = true;
             score++;
             break;
           }
         case 1:
           if (scan_button(rightBtn)) {
+            Serial.println("Case 1: Stlacene spravne");
             score++;
             break;
           } else if (scan_button(leftBtn)) {
+            Serial.println("Case 1: Stlacene zle");
             wrongPin = true;
             score++;
             break;
           }
         case 2:
           if (scan_button(leftBtn)) {
+            Serial.println("Case 2: Stlacene spravne");
             score++;
             break;
           } else if (scan_button(rightBtn)) {
+            Serial.println("Case 2: Stlacene zle");
             wrongPin = true;
             score++;
             break;
@@ -98,6 +106,7 @@ void loop() {
         wrongPinSound(true);
         wrongPin = false;
         outOfTime = false;
+        break;
       }
     }
     wrongPinSound(outOfTime);
@@ -121,19 +130,19 @@ void loop() {
     }
   };
 
-/* // Kontroluje pohyb
-  do {
-    digitalWrite(2, HIGH);
-    digitalWrite(3, HIGH);
-    delay(500);
-    digitalWrite(2, LOW);
-    digitalWrite(3, LOW);
-    delay(500);
-  } while (digitalRead(A0)== LOW);
+  /* // Kontroluje pohyb
+    do {
+      digitalWrite(2, HIGH);
+      digitalWrite(3, HIGH);
+      delay(500);
+      digitalWrite(2, LOW);
+      digitalWrite(3, LOW);
+      delay(500);
+    } while (digitalRead(A0)== LOW);
   */
 }
 
-int wrongPinSound(bool condition) {
+void wrongPinSound(bool condition) {
   // Ak sa zadal nespravny PIN, zabzuci
   if (condition) {
     digitalWrite(bzuciak, HIGH);
@@ -143,20 +152,18 @@ int wrongPinSound(bool condition) {
     digitalWrite(bzuciak, LOW);
     digitalWrite(redLed1, LOW);
     digitalWrite(redLed2, LOW);
-    return 1
   }
-  return 0;
 }
 
 int scan_button(int pin) {
   if (digitalRead(pin)) {
     digitalWrite(yellowLed1, HIGH);
     digitalWrite(yellowLed2, HIGH);
-    delay(20);
+    delay(50);
     while (digitalRead(pin)) {}
     digitalWrite(yellowLed1, LOW);
     digitalWrite(yellowLed2, LOW);
-    delay(20);
+    delay(50);
     return 1;
   }
   return 0;
