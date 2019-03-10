@@ -86,8 +86,8 @@ void loop() {
           }
       }
       // Ak sa stlacili 3x tlacidla a pin bol DOBRY
+      // Volny pristup v aute
       if (score == 3 && !wrongPin) {
-        // Volny pristup v aute
         for (int i = 0; i < 3; i++) {
           digitalWrite(bzuciak, HIGH);
           digitalWrite(greenLed1, HIGH);
@@ -97,6 +97,40 @@ void loop() {
           digitalWrite(greenLed1, LOW);
           digitalWrite(greenLed2, LOW);
           delay(200);
+        }
+        digitalWrite(greenLed1, HIGH);
+        digitalWrite(greenLed2, HIGH);
+        digitalWrite(yellowLed1, HIGH);
+        digitalWrite(yellowLed2, HIGH);
+
+        while () {
+          bool closedDoors;
+          if ((digitalRead(leftSens) == HIGH) && (digitalRead(rightSens) == HIGH)) {
+            closedDoors = true;
+          } else {
+            closedDoors = false;
+          }
+
+          if (scan_button(leftBtn) || scan_button(rightBtn)) {
+            if (closedDoors) {
+              Serial.println("Dvere su zavrete");
+              digitalWrite(greenLed1, HIGH);
+              digitalWrite(greenLed2, HIGH);
+              delay(3000);
+              digitalWrite(greenLed1, LOW);
+              digitalWrite(greenLed2, LOW);
+              break;
+            } else {
+              Serial.println("Najprv treba zavriet dvere");
+              digitalWrite(redLed1, HIGH);
+              digitalWrite(redLed2, HIGH);
+              digitalWrite(bzuciak, HIGH);
+              delay(2000);
+              digitalWrite(redLed1, LOW);
+              digitalWrite(redLed2, LOW);
+              digitalWrite(bzuciak, LOW);
+            }
+          }
         }
         outOfTime = false;
         break;
