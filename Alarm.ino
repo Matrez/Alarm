@@ -28,6 +28,8 @@ const byte leftSens = 10;
 const byte rightSens = 11;
 const byte tiltSens = 12;
 const byte bzuciak = 13;
+const byte initBtn = A1;
+const byte movementSens = A0;
 
 bool outOfTime = true;
 bool wrongPin = false;
@@ -44,145 +46,150 @@ void setup() {
 }
 
 void loop() {
-
-  // Kontroluje rozopnute magnety
-  if ((digitalRead(leftSens) == LOW) || (digitalRead(rightSens) == LOW)) {
-    tajm = millis();
-    while ((millis() - tajm) < timeToDeactivation) {
-      delay (150);
-      switch (score) {
-        case 0:
-          if (scan_button_with_yellow_led(leftBtn)) {
-            Serial.println("Case 0: Stlacene spravne");
-            score++;
-            break;
-          } else if (scan_button_with_yellow_led(rightBtn)) {
-            Serial.println("Case 0: Stlacene zle");
-            wrongPin = true;
-            score++;
-            break;
-          }
-        case 1:
-          if (scan_button_with_yellow_led(rightBtn)) {
-            Serial.println("Case 1: Stlacene spravne");
-            score++;
-            break;
-          } else if (scan_button_with_yellow_led(leftBtn)) {
-            Serial.println("Case 1: Stlacene zle");
-            wrongPin = true;
-            score++;
-            break;
-          }
-        case 2:
-          if (scan_button_with_yellow_led(leftBtn)) {
-            Serial.println("Case 2: Stlacene spravne");
-            score++;
-            break;
-          } else if (scan_button_with_yellow_led(rightBtn)) {
-            Serial.println("Case 2: Stlacene zle");
-            wrongPin = true;
-            score++;
-            break;
-          }
-      }
-      // Ak sa stlacili 3x tlacidla a pin bol DOBRY
-      // Volny pristup v aute
-      if (score == 3 && !wrongPin) {
-        for (int i = 0; i < 3; i++) {
-          digitalWrite(bzuciak, HIGH);
-          digitalWrite(greenLed1, HIGH);
-          digitalWrite(greenLed2, HIGH);
-          delay(200);
-          digitalWrite(bzuciak, LOW);
-          digitalWrite(greenLed1, LOW);
-          digitalWrite(greenLed2, LOW);
-          delay(200);
-        }
-        digitalWrite(yellowLed1, HIGH);
-        digitalWrite(yellowLed2, HIGH);
-
-        while (true) {
-          bool closedDoors;
-          if ((digitalRead(leftSens) == HIGH) && (digitalRead(rightSens) == HIGH)) {
-            closedDoors = true;
-          } else {
-            closedDoors = false;
-          }
-
-          if (scan_button(leftBtn) || scan_button(rightBtn)) {
-            if (closedDoors) {
-              Serial.println("Dvere su zavrete");
-              digitalWrite(yellowLed1, LOW);
-              digitalWrite(yellowLed2, LOW);
-              digitalWrite(greenLed1, HIGH);
-              digitalWrite(greenLed2, HIGH);
-              delay(3000);
-              digitalWrite(greenLed1, LOW);
-              digitalWrite(greenLed2, LOW);
+  if (digitalRead(initBtn) == HIGH) {
+    // Kontroluje rozopnute magnety
+    if ((digitalRead(leftSens) == LOW) || (digitalRead(rightSens) == LOW)) {
+      tajm = millis();
+      while ((millis() - tajm) < timeToDeactivation) {
+        delay (150);
+        switch (score) {
+          case 0:
+            if (scan_button_with_yellow_led(leftBtn)) {
+              Serial.println("Case 0: Stlacene spravne");
+              score++;
               break;
+            } else if (scan_button_with_yellow_led(rightBtn)) {
+              Serial.println("Case 0: Stlacene zle");
+              wrongPin = true;
+              score++;
+              break;
+            }
+          case 1:
+            if (scan_button_with_yellow_led(rightBtn)) {
+              Serial.println("Case 1: Stlacene spravne");
+              score++;
+              break;
+            } else if (scan_button_with_yellow_led(leftBtn)) {
+              Serial.println("Case 1: Stlacene zle");
+              wrongPin = true;
+              score++;
+              break;
+            }
+          case 2:
+            if (scan_button_with_yellow_led(leftBtn)) {
+              Serial.println("Case 2: Stlacene spravne");
+              score++;
+              break;
+            } else if (scan_button_with_yellow_led(rightBtn)) {
+              Serial.println("Case 2: Stlacene zle");
+              wrongPin = true;
+              score++;
+              break;
+            }
+        }
+        // Ak sa stlacili 3x tlacidla a pin bol DOBRY
+        // Volny pristup v aute
+        if (score == 3 && !wrongPin) {
+          for (int i = 0; i < 3; i++) {
+            digitalWrite(bzuciak, HIGH);
+            digitalWrite(greenLed1, HIGH);
+            digitalWrite(greenLed2, HIGH);
+            delay(200);
+            digitalWrite(bzuciak, LOW);
+            digitalWrite(greenLed1, LOW);
+            digitalWrite(greenLed2, LOW);
+            delay(200);
+          }
+          digitalWrite(yellowLed1, HIGH);
+          digitalWrite(yellowLed2, HIGH);
+          Serial.println("PIN SPRÁVNY, VOLNY POHYB PRIPUSTNY");
+
+          while (true) {
+            bool closedDoors;
+            if ((digitalRead(leftSens) == HIGH) && (digitalRead(rightSens) == HIGH)) {
+              closedDoors = true;
             } else {
-              Serial.println("Najprv treba zavriet dvere");
-              digitalWrite(yellowLed1, LOW);
-              digitalWrite(yellowLed2, LOW);
-              digitalWrite(redLed1, HIGH);
-              digitalWrite(redLed2, HIGH);
-              digitalWrite(bzuciak, HIGH);
-              delay(2000);
-              digitalWrite(redLed1, LOW);
-              digitalWrite(redLed2, LOW);
-              digitalWrite(bzuciak, LOW);
-              digitalWrite(yellowLed1, HIGH);
-              digitalWrite(yellowLed2, HIGH);
+              closedDoors = false;
+            }
+
+            if (scan_button(leftBtn) || scan_button(rightBtn)) {
+              if (closedDoors) {
+                Serial.println("Dvere su zavrete a system je aktivny");
+                digitalWrite(yellowLed1, LOW);
+                digitalWrite(yellowLed2, LOW);
+                digitalWrite(greenLed1, HIGH);
+                digitalWrite(greenLed2, HIGH);
+                delay(3000);
+                digitalWrite(greenLed1, LOW);
+                digitalWrite(greenLed2, LOW);
+                break;
+              } else {
+                Serial.println("Najprv treba zavriet dvere a az potom je mozne aktivovat system");
+                digitalWrite(yellowLed1, LOW);
+                digitalWrite(yellowLed2, LOW);
+                digitalWrite(redLed1, HIGH);
+                digitalWrite(redLed2, HIGH);
+                digitalWrite(bzuciak, HIGH);
+                delay(300);
+                digitalWrite(redLed1, LOW);
+                digitalWrite(redLed2, LOW);
+                digitalWrite(bzuciak, LOW);
+                digitalWrite(yellowLed1, HIGH);
+                digitalWrite(yellowLed2, HIGH);
+              }
             }
           }
+          outOfTime = false;
+          break;
         }
-        outOfTime = false;
-        break;
+        // Ak sa stlacili 3x tlacidla a pin bol ZLY
+        if (score == 3 && wrongPin) {
+          Serial.println("ZLA SEKVENCIA PINU!");
+          wrongPinSound(true);
+          wrongPin = false;
+          outOfTime = false;
+          break;
+        }
       }
-      // Ak sa stlacili 3x tlacidla a pin bol ZLY
-      if (score == 3 && wrongPin) {
-        wrongPinSound(true);
-        wrongPin = false;
-        outOfTime = false;
-        break;
+      wrongPinSound(outOfTime);
+      // Reset values
+      wrongPin = false;
+      outOfTime = true;
+      score = 0;
+    };
+
+    // Kontroluje otrasy
+    if (digitalRead(tiltSens) == LOW) {
+      Serial.println("OTRASY");
+      for (int i = 0; i < 3; ++i) {
+        digitalWrite(bzuciak, HIGH);
+        digitalWrite(yellowLed1, HIGH);
+        digitalWrite(yellowLed2, HIGH);
+        delay(500);
+        digitalWrite(bzuciak, LOW);
+        digitalWrite(yellowLed1, LOW);
+        digitalWrite(yellowLed2, LOW);
+        delay(200);
       }
     }
-    wrongPinSound(outOfTime);
-    // Reset values
-    wrongPin = false;
-    outOfTime = true;
-    score = 0;
-  };
 
-  // Kontroluje otrasy
-  if (digitalRead(tiltSens) == LOW) {
-    for (int i = 0; i < 3; ++i) {
-      digitalWrite(bzuciak, HIGH);
-      digitalWrite(yellowLed1, HIGH);
-      digitalWrite(yellowLed2, HIGH);
-      delay(500);
-      digitalWrite(bzuciak, LOW);
-      digitalWrite(yellowLed1, LOW);
-      digitalWrite(yellowLed2, LOW);
+ /*   // Kontroluje pohyb
+    if (digitalRead(movementSens) == HIGH) {
+      Serial.println("POZOR, NARUSITEL!!");
+      digitalWrite(redLed1, HIGH);
+      digitalWrite(redLed2, HIGH);
+      delay(1000);
+      digitalWrite(redLed1, LOW);
+      digitalWrite(redLed2, LOW);
       delay(200);
-    }
-  };
-
-  /* // Kontroluje pohyb
-    do {
-      digitalWrite(2, HIGH);
-      digitalWrite(3, HIGH);
-      delay(500);
-      digitalWrite(2, LOW);
-      digitalWrite(3, LOW);
-      delay(500);
-    } while (digitalRead(A0)== LOW);
-  */
+    } */
+  }
 }
 
 void wrongPinSound(bool condition) {
   // Ak sa zadal nespravny PIN, zabzuci
   if (condition) {
+    Serial.println("NARUSITEL!!!");
     digitalWrite(bzuciak, HIGH);
     digitalWrite(redLed1, HIGH);
     digitalWrite(redLed2, HIGH);
